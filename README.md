@@ -20,3 +20,10 @@ It provides REST APIs for user authentication and basic e-commerce features.
 - bcrypt
 
 ## Project Structure
+src/
+├── controllers
+├── models
+├── routes
+├── middlewares
+├── config
+└── index.js
