@@ -1,11 +1,13 @@
 import { User } from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 // create a user
 export const createUser = async (req, res) => {
   try {
-    const { email, password, firstname, lastname, mobile } = req.body;
+    const { email, password, firstname, lastname, mobile, role, address } =
+      req.body;
     if (!email || !password || !firstname || !lastname || !mobile) {
       return res.status(404).json({
         message: "all fields are required",
@@ -24,6 +26,8 @@ export const createUser = async (req, res) => {
         email,
         password: hashPassword,
         mobile,
+        role,
+        address,
       });
       res.status(201).json({
         success: true,
@@ -62,15 +66,24 @@ export const loginUser = async (req, res) => {
 
     // password compare
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({
         success: false,
         message: "Invalid email or password",
       });
     }
+
     // generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "1d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -83,6 +96,28 @@ export const loginUser = async (req, res) => {
       mobile: user?.mobile,
       role: user?.role,
       token,
+    });
+  } catch (error) {
+    console.log("error in login user", error);
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+    });
+  }
+};
+
+//  logout user
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false, // production me true
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful",
     });
   } catch (error) {
     console.log("error in creating user", error);
@@ -165,7 +200,9 @@ export const deleteUser = async (req, res) => {
 // update the user
 export const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    console.log(req.user);
+
+    const { id } = req.user;
 
     const updateUser = await User.findByIdAndUpdate(
       id,
@@ -174,12 +211,13 @@ export const updateUser = async (req, res) => {
         lastname: req.body?.lastname,
         email: req.body?.email,
         mobile: req.body?.mobile,
+        role: req.body?.role,
       },
       { new: true },
     );
 
     if (!updateUser) {
-    return  res.status(404).json({
+      return res.status(404).json({
         success: false,
         mesaage: "user not found",
       });
