@@ -6,6 +6,7 @@ import authRouter from "./routes/authRoutes.js"
 import productRouter from "./routes/productRoutes.js"
 
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 
 import { connectDb } from "./config/dbConnect.js";
 configDotenv()
@@ -15,6 +16,7 @@ connectDb()
 
 const app = express()
 app.use(cookieParser())
+app.use(morgan("dev"))
 
 app.use(express.json())
 
