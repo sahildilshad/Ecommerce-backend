@@ -111,7 +111,7 @@ export const logoutUser = async (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false, 
+      secure: false,
       sameSite: "strict",
     });
 
@@ -230,6 +230,41 @@ export const updateUser = async (req, res) => {
     });
   } catch (error) {
     console.log("error in delete user", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+export const updatePassword = async (req, res) => {
+  try {
+    console.log(req.user);
+
+    const { id } = req.user;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const user = await User.findById(id).select("+password")
+
+    user.password = password; 
+    user.markModified("password");
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+      password:user.password
+    });
+  } catch (error) {
+    console.log("error in updating  password", error.message);
 
     res.status(500).json({
       success: false,

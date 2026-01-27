@@ -17,13 +17,17 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    brand: {
+      type: String,
+      required: true,
+    },
     price: {
       type: Number,
       required: true,
     },
     category: {
-      type:String,
-      required:true,
+      type: String,
+      required: true,
     },
     quantity: {
       type: Number,
@@ -35,13 +39,7 @@ const productSchema = new mongoose.Schema(
     },
     images: {
       type: Array,
-    },
-    ratings: [
-      {
-        star: Number,
-        postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      },
-    ],
+    }
   },
   { timestamps: true },
 );

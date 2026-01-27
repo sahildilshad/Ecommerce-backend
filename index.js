@@ -4,6 +4,9 @@ import { configDotenv } from "dotenv";
 
 import authRouter from "./routes/authRoutes.js"
 import productRouter from "./routes/productRoutes.js"
+import cartRoutes from "./routes/cartRoutes.js";
+
+
 
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
@@ -22,6 +25,8 @@ app.use(express.json())
 
 app.use("/api/user",authRouter)
 app.use("/api/product",productRouter)
+
+app.use("/api/cart", cartRoutes);
 
 app.listen(PORT,()=>{
     console.log(`server is running at port ${PORT}`);   

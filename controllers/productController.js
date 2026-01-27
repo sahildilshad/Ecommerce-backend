@@ -8,9 +8,9 @@ export const createProduct = async (req, res) => {
       req.body.slug = slugify(req.body.title);
     }
 
-    const { title, description, price, quantity, category } = req.body;
+    const { title, description, price, quantity, category, brand } = req.body;
 
-    if (!title || !description || !price || !quantity || !category) {
+    if (!title || !description || !price || !quantity || !category || !brand) {
       res.status(400).json({
         message: "all fields are required",
       });
@@ -21,6 +21,7 @@ export const createProduct = async (req, res) => {
       category,
       price,
       quantity,
+      brand,
       slug: slugify(title, { lower: true }),
     });
 
@@ -40,14 +41,24 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    let filter={}
+     if (req.query.brand) {
+      filter.brand = req.query.brand;
+    }
+
+    if (req.query.category) {
+      filter.category = req.query.category;
+    }
+
+    const products = await Product.find(filter);
+
     res.status(200).json({
       message: "product fetching successfully",
       products,
     });
   } catch (error) {
     console.log("error in fetching product", error.message);
-    res.status(201).json({
+    res.status(500).json({
       message: "internal server error",
     });
   }
@@ -76,9 +87,9 @@ export const updateProduct = async (req, res) => {
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
-    const { title, description, price, quantity, category } = req.body;
-    
-    if (!title || !description || !price || !quantity || !category) {
+    const { title, description, price, quantity, category,brand } = req.body;
+
+    if (!title || !description || !price || !quantity || !category || !brand) {
       res.status(400).json({
         message: "all fields are required",
       });
@@ -94,6 +105,7 @@ export const updateProduct = async (req, res) => {
     product.category = category;
     product.price = price;
     product.quantity = quantity;
+    product.brand = brand;
 
     await product.save();
     res.status(201).json({
@@ -124,7 +136,7 @@ export const deleteProduct = async (req, res) => {
     });
   } catch (error) {
     console.log("error in deleted single product", error.message);
-    res.status(201).json({
+    res.status(500).json({
       message: "internal server error",
     });
   }
